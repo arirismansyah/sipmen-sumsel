@@ -47,7 +47,11 @@ class HomeController extends Controller
                         ->where('kode_desa', 'LIKE', '%' . $kode_desa . '%')
                         ->where('nbs', 'LIKE', '%' . $nbs . '%')
                         ->where('nomor_surat', 'LIKE', '%' . $keyword . '%')
-                        ->groupBy('nomor_surat')->paginate(10);
+                        ->groupBy('kode_kec')
+                        ->groupBy('kode_desa')
+                        ->groupBy('nbs')
+                        ->groupBy('nomor_surat')
+                        ->paginate(10);
                 } else {
                     $kode_kab = substr($user->kode_wilayah,2,2);
                     $data_kab = Kab::where('kode_kab', $kode_kab)->get();

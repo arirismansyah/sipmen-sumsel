@@ -31,6 +31,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/submit-dsrt', [SipmenController::class, 'input_dokumen_dikirim'])->name('submit-dsrt');
     Route::get('/lampiran', [SipmenController::class, 'surat_lampiran'])->name('lampiran');
     Route::get('/assign', [AuthController::class, 'assign'])->name('assign');
+    Route::get('/get-surat', [SipmenController::class, 'input_from_api'])->name('get-surat');
+    Route::get('/get-surat-db', [SipmenController::class, 'get_surat_db'])->name('get-surat-db');
 });
 
 Route::get('/sync-sipmen-api', [SipmenController::class, 'sync_sipmen_api'])->name('sync-sipmen-api');

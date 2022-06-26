@@ -7,10 +7,13 @@ use App\Models\DsrtDikirim;
 use App\Models\Kab;
 use App\Models\Kec;
 use App\Models\SampleDsrt;
+use App\Models\SuratPengiriman;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use PhpParser\Node\Expr\FuncCall;
 
@@ -22,10 +25,29 @@ class SipmenController extends Controller
     //
     public function input(Request $request)
     {
+        $user = Auth::user();
+
+        if ($user->kode_wilayah == '1600') {
+            $data_kab = Kab::all();
+            $kode_kab = $request->kode_kab;
+            $kode_kec = $request->kode_kec;
+            $kode_desa = $request->kode_desa;
+            $nbs = $request->nbs;
+        } else {
+            $kode_kab = substr($user->kode_wilayah, 2, 2);
+            $data_kab = Kab::where('kode_kab', $kode_kab)->get();
+            $kode_kec = $request->kode_kec;
+            $kode_desa = $request->kode_desa;
+            $nbs = $request->nbs;
+        }
+
+
+        // $data_dsrt->appends($request->all());
+
         // try {
         //     $response_api = Http::get('http://sipmen.bps.go.id/api1600');
         //     if ($response_api->json()) {
-                return view('pages/input');
+        return view('pages/input', compact('data_kab', 'kode_kab', 'kode_kec', 'kode_desa'));
         //     } else {
         //         return view('pages/vpn_warning');
         //     }
@@ -66,15 +88,14 @@ class SipmenController extends Controller
                 }
             } else {
                 # code...
-                $kode_kab = substr($user->kode_wilayah, 2,2);
-                $response_api = Http::get('http://sipmen.bps.go.id/api1600/'.$kode_kab);
+                $kode_kab = substr($user->kode_wilayah, 2, 2);
+                $response_api = Http::get('http://sipmen.bps.go.id/api1600/' . $kode_kab);
                 if ($response_api->json()) {
                     return $response_api->json();
                 } else {
                     return response('failed');
                 }
             }
-            
         } catch (\Throwable $th) {
             return response('failed');
         }
@@ -125,19 +146,19 @@ class SipmenController extends Controller
     {
         $nomor_surat = $request->nomor_surat;
         $kode_wilayah = $request->kode_wilayah;
-        
-        $kode_kab = substr($kode_wilayah,2,2);
-        $kode_kec = substr($kode_wilayah,4,3);
-        $kode_desa = substr($kode_wilayah,7,3);
-        $nbs = substr($kode_wilayah,10,4);
-        
+
+        $kode_kab = substr($kode_wilayah, 2, 2);
+        $kode_kec = substr($kode_wilayah, 4, 3);
+        $kode_desa = substr($kode_wilayah, 7, 3);
+        $nbs = substr($kode_wilayah, 10, 4);
+
         $data = DsrtDikirim::where('nomor_surat', $nomor_surat)
-        ->where('kode_kab', $kode_kab)
-        ->where('kode_kec', $kode_kec)
-        ->where('kode_desa', $kode_desa)
-        ->where('nbs', $nbs)
-        ->get();
-        
+            ->where('kode_kab', $kode_kab)
+            ->where('kode_kec', $kode_kec)
+            ->where('kode_desa', $kode_desa)
+            ->where('nbs', $nbs)
+            ->get();
+
         $data_kab = Kab::where('kode_kab', $kode_kab)->first();
         $data_kec = Kec::where('kode_kab', $kode_kab)->where('kode_kec', $kode_kec)->first();
         $data_desa = Desa::where('kode_kab', $kode_kab)->where('kode_kec', $kode_kec)->where('kode_desa', $kode_desa)->first();
@@ -162,41 +183,90 @@ class SipmenController extends Controller
         return $pdf->download('laporan-pdf.pdf');
     }
 
-    public function get_kecs(Request $request){
+    public function get_kecs(Request $request)
+    {
         $val = $request->validate([
             'kode_kab' => ['required'],
         ]);
 
-        if($val){
+        if ($val) {
             $data_kecs = Kec::where('kode_kab', $request->kode_kab)->get();
             return ($data_kecs);
         }
     }
 
-    public function get_desas(Request $request){
+    public function get_desas(Request $request)
+    {
         $val = $request->validate([
             'kode_kab' => ['required'],
             'kode_kec' => ['required'],
         ]);
 
-        if($val){
+        if ($val) {
             $data_desas = Desa::where('kode_kab', $request->kode_kab)->where('kode_kec', $request->kode_kec)->get();
             return ($data_desas);
         }
     }
 
-    public function get_nbs(Request $request){
+    public function get_nbs(Request $request)
+    {
         $val = $request->validate([
             'kode_kab' => ['required'],
             'kode_kec' => ['required'],
             'kode_desa' => ['required'],
         ]);
 
-        if($val){
+        if ($val) {
             $data_nbs = SampleDsrt::distinct()->where('kode_kab', $request->kode_kab)->where('kode_kec', $request->kode_kec)->where('kode_desa', $request->kode_desa)->get(['nbs']);
             return ($data_nbs);
         }
     }
 
+    public function get_surat_db(Request $request){
+        $user = Auth::user();
 
+        if ($user->kode_wilayah == '1600') {
+            $data_surat = SuratPengiriman::all();
+            return $data_surat;
+        } else {
+            $kode_kab = substr($user->kode_wilayah,2,2);
+            $data_surat = SuratPengiriman::where('kode_kab', $kode_kab);
+            return $data_surat;
+        }
+        
+    }
+
+    public function input_from_api(Request $request)
+    {
+        $response_api = Http::get('http://sipmen.bps.go.id/api1600/');
+        if ($response_api->json()) {
+            $response_json =  $response_api->json();
+            $data_surat_api = $response_json['data'];
+
+            foreach ($data_surat_api as $surat) {
+                # code...
+                try {
+                    SuratPengiriman::updateOrCreate(
+                        [
+                            'kode_prov' => $surat['kd_prop'],
+                            'kode_kab' => $surat['kd_kab'],
+                            'kode_kec' => $surat['kd_kec'],
+                            'kode_desa' => $surat['kd_desa'],
+                            'nbs' => $surat['kd_sls'],
+                        ],
+                        [
+                            'nomor_surat' => $surat['no_surat_kirim_prop'],
+                        ]
+                    );
+                } catch (Exception $e) {
+                    return response()->json([
+                        'error' => 'Whoops, looks like something went wrong.',
+                        'debug' => $e->getMessage()
+                    ]);
+                }
+            }
+        } else {
+            return response('failed');
+        }
+    }
 }

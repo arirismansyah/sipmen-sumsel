@@ -211,6 +211,7 @@
                                     <li class="breadcrumb-item active" aria-current="page">Home</li>
                                 </ol>
                             </div>
+                            @hasanyrole(['admin_prov|super_admin'])
                             <div class="ms-auto pageheader-btn">
                                 <a href="javascript:void(0);" class="btn btn-success btn-icon text-white">
                                     <span>
@@ -218,6 +219,7 @@
                                     </span> Export Rincian DSRT
                                 </a>
                             </div>
+                            @endhasanyrole
                         </div>
                         <!-- PAGE-HEADER END -->
 
@@ -231,8 +233,6 @@
 
 
                                         {{-- filter --}}
-
-
                                         <form id="filter-form" action="{{ url('home') }}" method="get">
                                             <div class="row row-sm">
 
