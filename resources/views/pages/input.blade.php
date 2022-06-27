@@ -216,6 +216,9 @@
                         </div>
 
                         <!-- PAGE-HEADER END -->
+
+                        
+
                         <div class="row">
                             <div class="col-lg-12 col-md-12">
                                 <div class="panel panel-primary">
@@ -225,6 +228,9 @@
                                         </div>
                                         <div class="tab-menu-heading">
                                             <div class="card-body">
+                                                <div class="row mb-4">
+                                                    @include('components.messages')
+                                                </div>
 
                                                 <div class="tabs-menu1 ">
                                                     <!-- Tabs -->
@@ -533,8 +539,8 @@
                                                                 </div>
                                                                 <div class="col-lg mg-t-10 mg-lg-t-0">
                                                                     <label class="form-label"> DESA</label>
-                                                                    <input id="input-kode-template" name="kode_desa"
-                                                                        class="form-control mb-4"
+                                                                    <input id="input-kode-desa-template"
+                                                                        name="kode_desa" class="form-control mb-4"
                                                                         placeholder="Kode Desa" readonly=""
                                                                         type="text">
                                                                 </div>
@@ -574,26 +580,84 @@
                                                             </div>
                                                             <div class="row" id="container-upload-template"
                                                                 style="display: none">
-                                                                <div class="row mb-5">
-                                                                    <div class="form-group mb-4 mb-lg-0">
-                                                                        <input name="input-file-template"
-                                                                            accept=".xlsx" type="file"
-                                                                            class="dropify" data-bs-height="180" />
-                                                                    </div>
-                                                                </div>
 
-                                                                <div class="row row-sm text-end">
-                                                                    <div class="col-lg">
-                                                                        <button id="submit-input-dsrt" type="button"
-                                                                            class="btn btn-primary btn-lg mb-4">
-                                                                            <i class="fe fe-upload-cloud me-2"></i>
-                                                                            SUBMIT
-                                                                        </button>
+                                                                <form action="{{ url('submit-template') }}"
+                                                                    method="post" enctype="multipart/form-data">
+                                                                    @csrf
+                                                                    <div class="row">
+                                                                        <div class="col-lg mg-t-10 mg-lg-t-0">
+                                                                            <label class="form-label"> NOMOR SURAT</label>
+                                                                            <input id="input-nomor-surat-template2"
+                                                                                name="nomor_surat"
+                                                                                class="form-control mb-4"
+                                                                                placeholder="Nomor Surat" readonly=""
+                                                                                type="text">
+                                                                        </div>
                                                                     </div>
 
-                                                                </div>
+                                                                    <div class="row">
+                                                                        <div class="col-lg mg-t-10 mg-lg-t-0">
+                                                                            <label class="form-label"> PROV</label>
+                                                                            <input id="input-kode-prov-template2"
+                                                                                name="kode_prov"
+                                                                                class="form-control mb-4"
+                                                                                placeholder="Kode Prov" readonly=""
+                                                                                type="text">
+                                                                        </div>
+                                                                        <div class="col-lg mg-t-10 mg-lg-t-0">
+                                                                            <label class="form-label"> KAB</label>
+                                                                            <input id="input-kode-kab-template2"
+                                                                                name="kode_kab"
+                                                                                class="form-control mb-4"
+                                                                                placeholder="Kode Kab" readonly=""
+                                                                                type="text">
+                                                                        </div>
+                                                                        <div class="col-lg mg-t-10 mg-lg-t-0">
+                                                                            <label class="form-label"> KEC</label>
+                                                                            <input id="input-kode-kec-template2"
+                                                                                name="kode_kec"
+                                                                                class="form-control mb-4"
+                                                                                placeholder="Kode Kec" readonly=""
+                                                                                type="text">
+                                                                        </div>
+                                                                        <div class="col-lg mg-t-10 mg-lg-t-0">
+                                                                            <label class="form-label"> DESA</label>
+                                                                            <input id="input-kode-desa-template2"
+                                                                                name="kode_desa"
+                                                                                class="form-control mb-4"
+                                                                                placeholder="Kode Desa" readonly=""
+                                                                                type="text">
+                                                                        </div>
+                                                                        <div class="col-lg mg-t-10 mg-lg-t-0">
+                                                                            <label class="form-label"> BS</label>
+                                                                            <input id="input-nbs-template2"
+                                                                                name="nbs"
+                                                                                class="form-control mb-4"
+                                                                                placeholder="Kode BS" readonly=""
+                                                                                type="text">
+                                                                        </div>
+                                                                    </div>
 
+                                                                    <div class="row mb-5">
+                                                                        <div class="form-group mb-4 mb-lg-0">
+                                                                            <input id="input-file-template"
+                                                                                name="file_template" accept=".xlsx"
+                                                                                type="file" class="dropify"
+                                                                                data-bs-height="180" />
+                                                                        </div>
+                                                                    </div>
 
+                                                                    <div class="row row-sm text-end">
+                                                                        <div class="col-lg">
+                                                                            <button id="submit-input-dsrt-template"
+                                                                                type="submit"
+                                                                                class="btn btn-primary btn-lg mb-4">
+                                                                                <i class="fe fe-upload-cloud me-2"></i>
+                                                                                SUBMIT
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </form>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -642,9 +706,10 @@
                                                             </div>
 
                                                             {{-- filter --}}
-                                                            <form id="filter-form" action="" method="get">
+                                                            <form id="filter-form"
+                                                                action="{{ url('get-input-template') }}"
+                                                                method="get">
                                                                 <div class="row row-sm">
-
                                                                     <div class="form-group col-lg mg-t-10 mg-lg-t-0">
                                                                         <label class="form-label"> KAB/KOTA</label>
                                                                         <select name="kode_kab"
@@ -934,26 +999,27 @@
 
             $.ajax({
                 method: "GET",
-                url: "{{url('get-surat-db')}}",
+                url: "{{ url('get-surat-db') }}",
                 success: function(response) {
                     console.log(response);
                     // hide loading
                     $('#loader-sipmen-api').hide();
 
-                    if (response.length>0) {
+                    if (response.length > 0) {
                         // mounting select
-                        
+
                         response.forEach(element => {
                             var option =
                                 '<option value="' + element['nomor_surat'] +
                                 '" prov="' + element['kode_prov'] +
-                                '" kab="' + element['kode_kab'] + '" kec="' + element[
+                                '" kab="' + element['kode_kab'] + '" kec="' +
+                                element[
                                     'kode_kec'] +
                                 '" desa="' + element['kode_desa'] + '" nbs="' +
                                 element['nbs'] + '">' + element[
                                     'nomor_surat'] + ' -- [KEC:' + element[
                                     'kode_kec'] + ' DESA:' + element[
-                                    'kode_kec'] + ' NBS:' + element['nbs'] +
+                                    'kode_desa'] + ' NBS:' + element['nbs'] +
                                 '] </option>';
 
                             $('[name = "nomor_surat"]').append(option);
@@ -984,29 +1050,30 @@
 
             $.ajax({
                 method: "GET",
-                url: "{{url('get-surat-db')}}",
+                url: "{{ url('get-surat-db') }}",
                 success: function(response) {
                     console.log(response);
                     // hide loading
                     $('#loader-sipmen-api-template').hide();
 
-                    if (response.length>0) {
+                    if (response.length > 0) {
                         // mounting select
-                        
+
                         response.forEach(element => {
                             var option =
                                 '<option value="' + element['nomor_surat'] +
                                 '" prov="' + element['kode_prov'] +
-                                '" kab="' + element['kode_kab'] + '" kec="' + element[
+                                '" kab="' + element['kode_kab'] + '" kec="' +
+                                element[
                                     'kode_kec'] +
                                 '" desa="' + element['kode_desa'] + '" nbs="' +
                                 element['nbs'] + '">' + element[
                                     'nomor_surat'] + ' -- [KEC:' + element[
                                     'kode_kec'] + ' DESA:' + element[
-                                    'kode_kec'] + ' NBS:' + element['nbs'] +
+                                    'kode_desa'] + ' NBS:' + element['nbs'] +
                                 '] </option>';
 
-                                $('#input-nomor-surat-template').append(option);
+                            $('#input-nomor-surat-template').append(option);
                         });
 
                         // display form
@@ -1196,6 +1263,13 @@
             $('#input-kode-kec-template').val(kode_kec);
             $('#input-kode-desa-template').val(kode_desa);
             $('#input-nbs-template').val(nbs);
+
+            $('#input-kode-prov-template2').val(kode_prov);
+            $('#input-kode-kab-template2').val(kode_kab);
+            $('#input-kode-kec-template2').val(kode_kec);
+            $('#input-kode-desa-template2').val(kode_desa);
+            $('#input-nbs-template2').val(nbs);
+            $('#input-nomor-surat-template2').val(nomor_surat);
 
             $('#container-upload-template').show();
 
@@ -1510,7 +1584,6 @@
         });
     });
 </script>
-
 
 
 </html>

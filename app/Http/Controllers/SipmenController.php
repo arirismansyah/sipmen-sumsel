@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TemplateInputExport;
+use App\Imports\InputDsrtImport;
 use App\Models\Desa;
 use App\Models\DsrtDikirim;
 use App\Models\Kab;
@@ -15,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Maatwebsite\Excel\Facades\Excel;
 use PhpParser\Node\Expr\FuncCall;
 
 use function PHPSTORM_META\type;
@@ -179,8 +182,9 @@ class SipmenController extends Controller
             'nbs' => $nbs,
         ];
 
+
         $pdf = FacadePdf::loadView('lampiran_pdf', $data_pdf);
-        return $pdf->download('laporan-pdf.pdf');
+        return $pdf->download('lampiran-'.$kode_wilayah.'-'.$nomor_surat.'.pdf');
     }
 
     public function get_kecs(Request $request)
@@ -222,18 +226,18 @@ class SipmenController extends Controller
         }
     }
 
-    public function get_surat_db(Request $request){
+    public function get_surat_db(Request $request)
+    {
         $user = Auth::user();
 
         if ($user->kode_wilayah == '1600') {
             $data_surat = SuratPengiriman::all();
             return $data_surat;
         } else {
-            $kode_kab = substr($user->kode_wilayah,2,2);
-            $data_surat = SuratPengiriman::where('kode_kab', $kode_kab);
+            $kode_kab = substr($user->kode_wilayah, 2, 2);
+            $data_surat = SuratPengiriman::where('kode_kab', $kode_kab)->get();
             return $data_surat;
         }
-        
     }
 
     public function input_from_api(Request $request)
@@ -268,5 +272,110 @@ class SipmenController extends Controller
         } else {
             return response('failed');
         }
+    }
+
+    public function export_input_template(Request $request)
+    {
+
+        $val = $request->validate([
+            'kode_kab' => ['required'],
+            'kode_kec' => ['required'],
+            'kode_desa' => ['required'],
+            'nbs' => ['required'],
+        ]);
+
+        if ($val) {
+            $kode_kab = $request->kode_kab;
+            $kode_kec = $request->kode_kec;
+            $kode_desa = $request->kode_desa;
+            $nbs = $request->nbs;
+
+            $kode_bs_full = '16' . $kode_kab . $kode_kec . $kode_desa . $nbs;
+
+            if ($kode_kab == null) {
+                $kode_kab = '';
+            }
+            if ($kode_kec == null) {
+                $kode_kec = '';
+            }
+            if ($kode_desa == null) {
+                $kode_desa = '';
+            }
+            if ($nbs == null) {
+                $nbs = '';
+            }
+
+            $export = new TemplateInputExport($kode_kab, $kode_kec, $kode_desa, $nbs);
+            return Excel::download($export, 'template_input_' . $kode_bs_full . '.xlsx');
+        }
+    }
+
+    public function submit_template(Request $request)
+    {
+        $request->validate([
+            'file_template' => ['required', 'mimes:csv,xlsx,xls'],
+            'kode_prov' => ['required'],
+            'kode_kab' => ['required'],
+            'kode_kec' => ['required'],
+            'kode_desa' => ['required'],
+            'nbs' => ['required'],
+            'nomor_surat' => ['required'],
+        ]);
+
+
+        $file = $request->file('file_template');
+        $nama_file_import = rand() . "_" . $file->getClientOriginalName();
+        $file->move('import/dsrt', $nama_file_import);
+        $import_dsrt = new InputDsrtImport;
+        Excel::import($import_dsrt, public_path("/import/dsrt/" . $nama_file_import));
+        $data_input_dsrt = $import_dsrt->get_input_dsrt();
+
+        $total_input_dsrt = 0;
+        foreach ($data_input_dsrt as $rt) {
+            try {
+                $dsrt = DsrtDikirim::updateOrCreate(
+                    [
+                        'kode_prov' => $request->kode_prov,
+                        'kode_kab' => $request->kode_kab,
+                        'kode_kec' => $request->kode_kec,
+                        'kode_desa' => $request->kode_desa,
+                        'nbs' => $request->nbs,
+                        'no_dsrt' => (int)$rt['no_dsrt'],
+                        'nus' => (int)$rt['nus'],
+                    ],
+                    [
+                        'nomor_surat' => $request->nomor_surat,
+                        'nama_sls' => $rt['nama_sls'],
+                        'nama_krt' => $rt['nama_krt'],
+                        'status_dikirim' => (int)$rt['status_dikirim'],
+                        'status_response' => (int)$rt['status_response'],
+                    ]
+                );
+
+                if($dsrt){
+                    $affected_row = 1;
+                } else {
+                    $affected_row = 0;
+                }
+
+                $total_input_dsrt += $affected_row;
+
+            } catch (Exception $e) {
+                return response()->json([
+                    'error' => 'Whoops, looks like something went wrong.',
+                    'debug' => $e->getMessage()
+                ]);
+            }
+        }
+
+        $error_import = count($data_input_dsrt) - $total_input_dsrt;
+
+        if ($error_import > 0) {
+            return redirect()->back()
+                ->with("success", "Sejumlah " . $total_input_dsrt . " RT berhasil diinput")
+                ->with("error", "Sejumlah " . $error_import . " RT gagal diinput");
+        }
+
+        return redirect()->back()->with("success", "Sejumlah " . $total_input_dsrt . " RT berhasil diinput");
     }
 }

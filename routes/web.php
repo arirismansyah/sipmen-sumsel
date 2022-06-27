@@ -33,6 +33,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/assign', [AuthController::class, 'assign'])->name('assign');
     Route::get('/get-surat', [SipmenController::class, 'input_from_api'])->name('get-surat');
     Route::get('/get-surat-db', [SipmenController::class, 'get_surat_db'])->name('get-surat-db');
+    Route::get('/get-input-template', [SipmenController::class, 'export_input_template'])->name('get-input-template');
+    Route::post('/submit-template', [SipmenController::class, 'submit_template'])->name('submit-template');
 });
 
 Route::get('/sync-sipmen-api', [SipmenController::class, 'sync_sipmen_api'])->name('sync-sipmen-api');

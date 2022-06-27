@@ -16,9 +16,8 @@ class TemplateInputExport implements FromCollection, WithHeadings
 
     use Exportable;
 
-    public function __construct(string $kode_prov, string $kode_kab, string $kode_kec, string $kode_desa, string $nbs,)
+    public function __construct(string $kode_kab, string $kode_kec, string $kode_desa, string $nbs,)
     {
-        $this->kode_prov = $kode_prov;
         $this->kode_kab = $kode_kab;
         $this->kode_kec = $kode_kec;
         $this->kode_desa = $kode_desa;
@@ -28,11 +27,11 @@ class TemplateInputExport implements FromCollection, WithHeadings
     public function collection()
     {
         //
-        return SampleDsrt::where('kode_prov', $this->kode_prov)
-        ->where('kode_kab', $this->kode_kab)
-        ->where('kode_kec', $this->kode_kec)
-        ->where('kode_desa', $this->kode_desa)
-        ->where('nbs', $this->nbs)
+        return SampleDsrt::where('kode_kab', 'LIKE', '%'.$this->kode_kab.'%')
+        ->where('kode_kec', 'LIKE', '%'.$this->kode_kec.'%')
+        ->where('kode_desa', 'LIKE', '%'.$this->kode_desa.'%')
+        ->where('nbs', 'LIKE', '%'.$this->nbs.'%')
+        ->select('no_dsrt', 'nus', 'nama_sls', 'nama_krt')
         ->get();
         
     }
@@ -43,7 +42,8 @@ class TemplateInputExport implements FromCollection, WithHeadings
             'nus',
             'nama_sls',
             'nama_krt',
-            'status',
+            'status_dikirim',
+            'status_response',
         ];
         return $column;
     }
